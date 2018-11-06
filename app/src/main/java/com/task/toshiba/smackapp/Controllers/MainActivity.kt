@@ -11,13 +11,16 @@ import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import com.task.toshiba.smackapp.Model.Channel
 import com.task.toshiba.smackapp.R
 import com.task.toshiba.smackapp.R.id.*
 import com.task.toshiba.smackapp.Services.AuthService
+import com.task.toshiba.smackapp.Services.MessageService
 import com.task.toshiba.smackapp.Services.UserDataService
 import com.task.toshiba.smackapp.Utilits.BROADCAST_USER_DATA_CHANGE
 import com.task.toshiba.smackapp.Utilits.SOCKET_URL
 import io.socket.client.IO
+import io.socket.emitter.Emitter
 import kotlinx.android.synthetic.main.activity_log_in.*
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
@@ -45,6 +48,7 @@ class MainActivity : AppCompatActivity() {
         LocalBroadcastManager.getInstance(this).registerReceiver(userDataChangeListener, IntentFilter(
                 BROADCAST_USER_DATA_CHANGE))
         socket.connect()
+        socket.on("channelCreated", onNewChannel)
     }
 
     override fun onPause() {
@@ -108,6 +112,18 @@ class MainActivity : AppCompatActivity() {
 
         }
 
+
+    }
+
+    private val onNewChannel = Emitter.Listener { args ->
+        runOnUiThread {
+            var name = args[0] as String
+            var description = args[1] as String
+            var id = args[2] as String
+
+            val newChannel = Channel(name, description, id)
+            MessageService.Channels.add(newChannel)
+        }
 
     }
 
