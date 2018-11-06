@@ -1,15 +1,15 @@
 package com.task.toshiba.smackapp.Services
 
 import android.content.Context
+import android.content.Intent
+import android.support.v4.content.LocalBroadcastManager
 import android.util.Log
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.google.gson.JsonIOException
-import com.task.toshiba.smackapp.Utilits.URL_CREATE_USER
-import com.task.toshiba.smackapp.Utilits.URL_LOGIN
-import com.task.toshiba.smackapp.Utilits.URL_REGISTER
+import com.task.toshiba.smackapp.Utilits.*
 import org.json.JSONException
 import org.json.JSONObject
 import java.lang.reflect.Method
@@ -121,10 +121,52 @@ object AuthService {
             override fun getHeaders(): MutableMap<String, String> {
                 var header = HashMap<String, String>()
                 header.put("Authorization", "Bearer " + userToken)
-                return headers
+                return header
             }
         }
         Volley.newRequestQueue(contex).add(createUserRequest)
+    }
+
+    fun findUserByEmail(contex: Context, complete: (Boolean) -> Unit) {
+
+        val requestFindUser = object : JsonObjectRequest(Method.GET, URL_FIND_USER + userEmail, null,
+                Response.Listener {
+                    try {
+                        UserDataService.name = it.getString("name")
+                        UserDataService.email = it.getString("email")
+                        UserDataService.avatarName = it.getString("avatarName")
+                        UserDataService.avatarColor = it.getString("avatarColor")
+                        UserDataService.id = it.getString("_id")
+
+
+                        var brodCast = Intent(BROADCAST_USER_DATA_CHANGE)
+                        LocalBroadcastManager.getInstance(contex).sendBroadcast(brodCast)
+
+                        complete(true)
+
+                    } catch (e: JSONException) {
+                        Log.d("JSON ERROR", "EXC = ${e.localizedMessage}")
+                        complete(false)
+                    }
+
+                }, Response.ErrorListener {
+            Log.d("ERROR", "Error in Find user $it")
+            complete(false)
+
+        }) {
+            override fun getBodyContentType(): String {
+                return "application/json; charset=utf-8"
+            }
+
+            override fun getHeaders(): MutableMap<String, String> {
+                var header = HashMap<String, String>()
+                header.put("Authorization", "Bearer " + userToken)
+                return header
+            }
+
+        }
+
+        Volley.newRequestQueue(contex).add(requestFindUser)
     }
 
 }
