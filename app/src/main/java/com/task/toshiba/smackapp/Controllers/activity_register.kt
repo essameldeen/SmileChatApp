@@ -26,12 +26,12 @@ class activity_register : AppCompatActivity() {
 
     fun createUserFun(view: View) {
         registerLoading.visibility = View.VISIBLE
-        AuthService.register(this, email = et_email.text.toString(), password = et_password.text.toString(), complete = {
+        AuthService.register(email = et_email.text.toString(), password = et_password.text.toString(), complete = {
             if (it) {
-                AuthService.login(contex = this, email = et_email.text.toString(), password = et_password.text.toString(), complete = {
+                AuthService.login( email = et_email.text.toString(), password = et_password.text.toString(), complete = {
                     if (it) {
                         registerLoading.visibility = View.INVISIBLE
-                        AuthService.createUser(this, et_name.text.toString(), et_email.text.toString(), avtarImage, avtarColor) {
+                        AuthService.createUser( et_name.text.toString(), et_email.text.toString(), avtarImage, avtarColor) {
                             if (it) {
                                 sendBrodCast()
                                 finish()

@@ -1,6 +1,7 @@
 package com.task.toshiba.smackapp.Services
 
 import android.graphics.Color
+import com.task.toshiba.smackapp.Controllers.App
 import java.util.*
 
 object UserDataService {
@@ -16,9 +17,12 @@ object UserDataService {
         avatarColor = ""
         avatarName = ""
         id = ""
-        AuthService.userLogedIn = false
-        AuthService.userEmail = ""
-        AuthService.userToken = ""
+        App.sharedPreferences.isLoggedIn = false
+        App.sharedPreferences.userEmail = ""
+        App.sharedPreferences.authToken = ""
+
+        MessageService.clearChannels()
+        MessageService.clearMessage()
 
     }
 

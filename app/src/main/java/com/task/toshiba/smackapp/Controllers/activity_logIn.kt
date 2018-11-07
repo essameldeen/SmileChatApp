@@ -23,10 +23,10 @@ class activity_logIn : AppCompatActivity() {
     fun logInFun(view: View) {
         loginLoading.visibility = View.VISIBLE
         hideeyboard()
-        if (AuthService.userLogedIn) {
+        if (App.sharedPreferences.isLoggedIn) {
             mainPage()
         }
-        AuthService.login(this, et_userName.text.toString(), et_passWord.text.toString(), complete = {
+        AuthService.login(et_userName.text.toString(), et_passWord.text.toString(), complete = {
             loginLoading.visibility = View.INVISIBLE
             if (it) {
                 AuthService.findUserByEmail(contex = this, complete = {

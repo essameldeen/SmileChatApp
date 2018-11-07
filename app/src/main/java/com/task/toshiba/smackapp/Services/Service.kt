@@ -9,6 +9,7 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.google.gson.JsonIOException
+import com.task.toshiba.smackapp.Controllers.App
 import com.task.toshiba.smackapp.Utilits.*
 import org.json.JSONException
 import org.json.JSONObject
@@ -16,10 +17,7 @@ import java.lang.reflect.Method
 
 
 object AuthService {
-    var userLogedIn = false
-    var userEmail = ""
-    var userToken = ""
-    fun register(contex: Context, email: String, password: String, complete: (Boolean) -> Unit) {
+    fun register( email: String, password: String, complete: (Boolean) -> Unit) {
         val responseBody = JSONObject()
         responseBody.put("email", email)
         responseBody.put("password", password)
@@ -31,7 +29,7 @@ object AuthService {
             complete(true)
 
         }, Response.ErrorListener { error ->
-            Log.d("ERROR", "error happen $error")
+            Log.d("ERROR", "error happen ${error.localizedMessage}")
             complete(false)
 
         }) {
@@ -43,10 +41,10 @@ object AuthService {
                 return requestBody.toByteArray()
             }
         }
-        Volley.newRequestQueue(contex).add(registerRequest)
+         App.sharedPreferences.volley.add(registerRequest)
     }
 
-    fun login(contex: Context, email: String, password: String, complete: (Boolean) -> Unit) {
+    fun login(  email: String, password: String, complete: (Boolean) -> Unit) {
 
         val jsonBody = JSONObject()
         jsonBody.put("email", email)
@@ -55,9 +53,9 @@ object AuthService {
 
         val loginRequest = object : JsonObjectRequest(Method.POST, URL_LOGIN, null, Response.Listener {
             try {
-                userToken = it.getString("token")
-                userEmail = it.getString("user")
-                userLogedIn = true
+                App.sharedPreferences.authToken = it.getString("token")
+                App.sharedPreferences.userEmail = it.getString("user")
+                App.sharedPreferences.isLoggedIn = true
                 complete(true)
             } catch (e: JSONException) {
                 Log.d("JSON ERROR", "EXC = ${e.localizedMessage}")
@@ -78,10 +76,10 @@ object AuthService {
                 return jsonRequest.toByteArray()
             }
         }
-        Volley.newRequestQueue(contex).add(loginRequest)
+         App.sharedPreferences.volley.add(loginRequest)
     }
 
-    fun createUser(contex: Context, name: String, email: String, avatarName: String, avatarColor: String, complete: (Boolean) -> Unit) {
+    fun createUser( name: String, email: String, avatarName: String, avatarColor: String, complete: (Boolean) -> Unit) {
         val jsonBody = JSONObject()
         jsonBody.put("name", name)
         jsonBody.put("email", email)
@@ -120,22 +118,22 @@ object AuthService {
 
             override fun getHeaders(): MutableMap<String, String> {
                 var header = HashMap<String, String>()
-                header.put("Authorization", "Bearer " + userToken)
+                header.put("Authorization", "Bearer ${App.sharedPreferences.authToken}")
                 return header
             }
         }
-        Volley.newRequestQueue(contex).add(createUserRequest)
+         App.sharedPreferences.volley.add(createUserRequest)
     }
 
-    fun findUserByEmail(contex: Context, complete: (Boolean) -> Unit) {
+    fun findUserByEmail(contex:Context, complete: (Boolean) -> Unit) {
 
-        val requestFindUser = object : JsonObjectRequest(Method.GET, URL_FIND_USER + userEmail, null,
+        val requestFindUser = object : JsonObjectRequest(Method.GET, URL_FIND_USER +  App.sharedPreferences.userEmail, null,
                 Response.Listener {
                     try {
                         UserDataService.name = it.getString("name")
                         UserDataService.email = it.getString("email")
                         UserDataService.avatarName = it.getString("avatarName")
-                        UserDataService.avatarColor = it.getString("avatarColor")
+                        //UserDataService.avatarColor = it.getString("avatarColor")
                         UserDataService.id = it.getString("_id")
 
 
@@ -160,13 +158,13 @@ object AuthService {
 
             override fun getHeaders(): MutableMap<String, String> {
                 var header = HashMap<String, String>()
-                header.put("Authorization", "Bearer " + userToken)
+                header.put("Authorization", "Bearer ${App.sharedPreferences.authToken}" )
                 return header
             }
 
         }
 
-        Volley.newRequestQueue(contex).add(requestFindUser)
+         App.sharedPreferences.volley.add(requestFindUser)
     }
 
 }
